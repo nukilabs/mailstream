@@ -2,6 +2,8 @@ github.com/emersion/go-imap/v2 v2.0.0-beta.2 h1:bfFHKU6e6DyxkJJrEgXXILDtyELzP2Gd
 github.com/emersion/go-imap/v2 v2.0.0-beta.2/go.mod h1:HVKGwfmw6RkfT33vW8DQpSlvGJatNivoFNl/z/Sq4vE=
 github.com/emersion/go-imap/v2 v2.0.0-beta.5 h1:H3858DNmBuXyMK1++YrQIRdpKE1MwBc+ywBtg3n+0wA=
 github.com/emersion/go-imap/v2 v2.0.0-beta.5/go.mod h1:BZTFHsS1hmgBkFlHqbxGLXk2hnRqTItUgwjSSCsYNAk=
+github.com/emersion/go-imap/v2 v2.0.0-beta.6 h1:3w7QGUcDEoZXr+okRZR75VBjX0yvvJqkfy3gibbH2yY=
+github.com/emersion/go-imap/v2 v2.0.0-beta.6/go.mod h1:BZTFHsS1hmgBkFlHqbxGLXk2hnRqTItUgwjSSCsYNAk=
 github.com/emersion/go-message v0.18.1 h1:tfTxIoXFSFRwWaZsgnqS1DSZuGpYGzSmCZD8SK3QA2E=
 github.com/emersion/go-message v0.18.1/go.mod h1:XpJyL70LwRvq2a8rVbHXikPgKj8+aI0kGdHlg16ibYA=
 github.com/emersion/go-message v0.18.2 h1:rl55SQdjd9oJcIoQNhubD2Acs1E6IzlZISRTK7x/Lpg=
@@ -39,6 +41,8 @@ golang.org/x/text v0.14.0 h1:ScX5w1eTa3QqT8oi6+ziP7dTV1S2+ALU0bI+0zXKWiQ=
 golang.org/x/text v0.14.0/go.mod h1:18ZOQIKpY8NJVqYksKHtTdi31H5itFRjB5/qKTNYzSU=
 golang.org/x/text v0.22.0 h1:bofq7m3/HAFvbF51jz3Q9wLg3jkvSPuiZu/pD1XwgtM=
 golang.org/x/text v0.22.0/go.mod h1:YRoo4H8PVmsu+E3Ou7cqLVH8oXWIHVoX0jqUWALQhfY=
+golang.org/x/text v0.28.0 h1:rhazDwis8INMIwQ4tpjLDzUhx6RlXqZNPEM0huQojng=
+golang.org/x/text v0.28.0/go.mod h1:U8nCwOR8jO/marOQ0QbDiOngZVEBB7MAiitBuMjXiNU=
 golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 golang.org/x/tools v0.0.0-20191119224855-298f0cb1881e/go.mod h1:b+2E5dAYhXwXZwtnZ6UAqBI28+e2cm9otk0dWdXHAEo=
 golang.org/x/tools v0.1.12/go.mod h1:hNGJHUnrk76NpqgfD5Aqm5Crs+Hm0VOH/i9J2+nxYbc=

@@ -6,7 +6,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/robin-samuel/mailstream"
+	"github.com/nukilabs/mailstream"
 )
 
 func main() {

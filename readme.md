@@ -15,7 +15,7 @@ MailStream is a Go library that provides an efficient interface to interact with
 To install MailStream, use the `go get` command:
 
 ```bash
-go get github.com/robin-samuel/mailstream
+go get github.com/nukilabs/mailstream
 ```
 
 This will retrieve the library from GitHub and install it in your Go workspace.
@@ -37,7 +37,7 @@ import (
     "context"
     "fmt"
     "log"
-    "github.com/robin-samuel/mailstream"
+    "github.com/nukilabs/mailstream"
 )
 
 func main() {
@@ -52,7 +52,8 @@ func main() {
         log.Fatal(err)
     }
     defer client.Close()
-
+	
+	done := client.WaitForUpdates(context.Background())
     listener := client.Subscribe()
     for {
         select {
@@ -80,7 +81,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/robin-samuel/mailstream"
+	"github.com/nukilabs/mailstream"
 )
 
 func main() {
