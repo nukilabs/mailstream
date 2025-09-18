@@ -22,7 +22,7 @@ type Mail struct {
 	HTML  []byte
 }
 
-func buildMail(message *imapclient.FetchMessageBuffer) (*Mail, error) {
+func build(message *imapclient.FetchMessageBuffer) (*Mail, error) {
 	var body []byte
 	for _, part := range message.BodySection {
 		if part.Section.Specifier == imap.PartSpecifierNone {

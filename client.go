@@ -18,10 +18,10 @@ type Client struct {
 	mailboxHandler chan imapclient.UnilateralDataMailbox
 	fetchHandler   chan imapclient.FetchMessageData
 
-	listener       []chan *Mail
+	listeners      map[chan *Mail]struct{}
 	broadcast      chan *Mail
 	addListener    chan chan *Mail
-	removeListener chan (<-chan *Mail)
+	removeListener chan chan *Mail
 	numMessages    uint32
 
 	waiting atomic.Bool
@@ -42,7 +42,7 @@ func New(config Config) (*Client, error) {
 	c := &Client{
 		broadcast:      make(chan *Mail),
 		addListener:    make(chan chan *Mail),
-		removeListener: make(chan (<-chan *Mail)),
+		removeListener: make(chan chan *Mail),
 	}
 
 	if config.Mailbox == "" {
@@ -99,33 +99,33 @@ func New(config Config) (*Client, error) {
 }
 
 func (c *Client) Close() error {
+	close(c.broadcast)
 	return c.client.Close()
 }
 
 func (c *Client) serve() {
 	defer func() {
-		for _, listener := range c.listener {
+		for listener := range c.listeners {
 			close(listener)
 		}
 	}()
 	for {
 		select {
 		case listener := <-c.addListener:
-			c.listener = append(c.listener, listener)
+			c.listeners[listener] = struct{}{}
 		case listener := <-c.removeListener:
-			for i, l := range c.listener {
-				if l == listener {
-					c.listener = append(c.listener[:i], c.listener[i+1:]...)
-					break
-				}
+			if _, ok := c.listeners[listener]; ok {
+				delete(c.listeners, listener)
+				close(listener)
 			}
 		case mail, ok := <-c.broadcast:
 			if !ok {
 				return
 			}
-			for _, listener := range c.listener {
-				if listener != nil {
-					listener <- mail
+			for listener := range c.listeners {
+				select {
+				case listener <- mail:
+				default:
 				}
 			}
 		}
@@ -135,15 +135,19 @@ func (c *Client) serve() {
 // Subscribe returns a channel that will receive new mails as they arrive.
 // It is the caller's responsibility to unsubscribe from the channel when done.
 // IMPORTANT: If the caller does not read from the channel, the client will block.
-func (c *Client) Subscribe() <-chan *Mail {
-	listener := make(chan *Mail, 10)
+func (c *Client) Subscribe(size ...int) chan *Mail {
+	bsize := 10
+	if len(size) > 0 && size[0] > 0 {
+		bsize = size[0]
+	}
+	listener := make(chan *Mail, bsize)
 	c.addListener <- listener
 	return listener
 }
 
 // Unsubscribe removes the given channel from the client's list of listeners.
 // The channel will no longer receive new mails.
-func (c *Client) Unsubscribe(ch <-chan *Mail) {
+func (c *Client) Unsubscribe(ch chan *Mail) {
 	c.removeListener <- ch
 }
 
@@ -192,7 +196,7 @@ func (c *Client) WaitForUpdates(ctx context.Context) <-chan error {
 		defer close(done)
 
 		if !c.waiting.CompareAndSwap(false, true) {
-			done <- errors.New("already waiting for updates")
+			done <- errors.New("waiting for updates")
 			return
 		}
 		defer c.waiting.Store(false)
@@ -259,7 +263,7 @@ func (c *Client) fetch(seq imap.SeqSet) error {
 		}
 
 		for _, message := range messages {
-			mail, err := buildMail(message)
+			mail, err := build(message)
 			if err != nil {
 				return err
 			}
