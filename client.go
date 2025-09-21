@@ -40,6 +40,7 @@ type Config struct {
 // The client will start listening for new mails in the INBOX if no mailbox is specified.
 func New(config Config) (*Client, error) {
 	c := &Client{
+		listeners:      make(map[chan *Mail]struct{}),
 		broadcast:      make(chan *Mail),
 		addListener:    make(chan chan *Mail),
 		removeListener: make(chan chan *Mail),
