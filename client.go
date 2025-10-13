@@ -2,14 +2,17 @@ package mailstream
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"mime"
+	"net/url"
 	"strconv"
 	"sync/atomic"
 
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
 	"github.com/emersion/go-message/charset"
+	"golang.org/x/net/proxy"
 )
 
 type Client struct {
@@ -33,6 +36,7 @@ type Config struct {
 	Email    string
 	Password string
 	Mailbox  string
+	ProxyURL *url.URL
 }
 
 // New creates a new mail client with the given configuration.
@@ -50,6 +54,11 @@ func New(config Config) (*Client, error) {
 	}
 
 	address := config.Host + ":" + strconv.Itoa(config.Port)
+	tlsConfig := &tls.Config{
+		ServerName: config.Host,
+		NextProtos: []string{"imap"},
+	}
+
 	options := &imapclient.Options{
 		WordDecoder: &mime.WordDecoder{CharsetReader: charset.Reader},
 		UnilateralDataHandler: &imapclient.UnilateralDataHandler{
@@ -73,13 +82,28 @@ func New(config Config) (*Client, error) {
 
 	var client *imapclient.Client
 	var err error
-	// Check if the server supports implicit TLS
-	if client, err = imapclient.DialTLS(address, options); err != nil {
-		// Check if the server supports STARTTLS
-		if client, err = imapclient.DialStartTLS(address, options); err != nil {
+
+	var dialer proxy.Dialer
+	if config.ProxyURL != nil {
+		dialer, err = proxy.FromURL(config.ProxyURL, nil)
+		if err != nil {
 			return nil, err
 		}
+	} else {
+		dialer = proxy.Direct
 	}
+
+	conn, err := dialer.Dial("tcp", address)
+	if err != nil {
+		return nil, err
+	}
+
+	tlsConn := tls.Client(conn, tlsConfig)
+	if err = tlsConn.Handshake(); err != nil {
+		conn.Close()
+		return nil, err
+	}
+	client = imapclient.New(tlsConn, options)
 
 	// Login with the given username and password
 	if err := client.Login(config.Email, config.Password).Wait(); err != nil {
